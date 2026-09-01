@@ -61,19 +61,24 @@ export default function Batch() {
         }),
       });
       if (!r.ok) throw Error("登录已失效或请求失败");
-      const text = await r.text();
-      const rows = text
-        .trim()
-        .split("\n")
-        .filter(Boolean)
-        .map((line) => JSON.parse(line));
-      setResults(rows.filter((x: Result & { event?: string }) => !x.event));
-      const s = rows.find((x: { event?: string }) => x.event === "summary");
-      setNote(
-        s
-          ? `完成：新检测 ${s.fresh} 个，跳过缓存 ${s.cachedSkipped} 个`
-          : "检测完成",
-      );
+      const reader = r.body?.getReader();
+      if (!reader) throw Error("无法读取检测流");
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const chunk = await reader.read();
+        buffer += decoder.decode(chunk.value || new Uint8Array(), { stream: !chunk.done });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const row = JSON.parse(line) as Result & { event?: string; fresh?: number; cachedSkipped?: number };
+          if (row.event === "summary") setNote(`完成：新检测 ${row.fresh ?? 0} 个，跳过缓存 ${row.cachedSkipped ?? 0} 个`);
+          else setResults(old => [...old, row]);
+        }
+        if (chunk.done) break;
+      }
+      if (buffer.trim()) { const row = JSON.parse(buffer) as Result & { event?: string }; if (!row.event) setResults(old => [...old, row]); }
     } catch (e) {
       if ((e as Error).name === "AbortError") setNote("检测已停止");
       else setNote((e as Error).message);

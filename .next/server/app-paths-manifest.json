@@ -1,7 +1,4 @@
 {
-  "/icon.svg/route": "app/icon.svg/route.js",
   "/page": "app/page.js",
-  "/batch/page": "app/batch/page.js",
-  "/register/page": "app/register/page.js",
-  "/login/page": "app/login/page.js"
+  "/batch/page": "app/batch/page.js"
 }
