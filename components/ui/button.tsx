@@ -1,0 +1,3 @@
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+export function Button({ className, variant='default', ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default'|'outline' }) { return <button className={cn('inline-flex h-11 items-center justify-center rounded-lg px-5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 disabled:opacity-60', variant==='outline' ? 'border border-slate-200 bg-white text-slate-700 hover:border-brand hover:text-brand' : 'bg-brand text-white hover:bg-orange-600', className)} {...props} /> }
